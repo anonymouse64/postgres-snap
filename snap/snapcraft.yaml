@@ -1,0 +1,48 @@
+name: postgres
+base: core18
+version: "10"
+summary: PostgreSQL
+description: PostgreSQL
+
+grade: stable
+confinement: strict
+
+passthrough:
+  system-usernames:
+    snap_daemon: shared
+  hooks:
+    install:
+      environment:
+        LC_ALL: C.UTF-8
+        LANG: C.UTF-8
+
+      command-chain:
+        - snap/command-chain/snapcraft-runner
+
+apps:
+  postgres:
+    adapter: full
+    command: bin/gosu snap_daemon $SNAP/bin/postgres-wrapper.sh
+    daemon: forking
+    plugs:
+      - network
+      - network-bind
+
+parts:
+  gosu:
+    source: https://github.com/tianon/gosu.git
+    plugin: go
+    go-importpath: github.com/tianon/gosu
+    build-environment:
+      - CGO_ENABLED: "0"
+  wrappers:
+    plugin: dump
+    source: .
+    stage:
+      - bin/
+      - etc/
+  postgres:
+    plugin: nil
+    stage-packages:
+      - postgresql
+      - postgresql-contrib

@@ -1,0 +1,13 @@
+#!/bin/bash -e
+
+if [ ! -d "$SNAP_DATA/etc/postgresql/10/main" ]; then
+    mkdir -p "$SNAP_DATA/etc/postgresql/10/main"
+    touch "$SNAP_DATA/etc/postgresql/10/main/postgresql.conf"
+fi
+
+# ensure the postgres data directory exists and is owned by snap_daemon
+mkdir -p "$SNAP_DATA/postgresql" 
+chown -R snap_daemon:snap_daemon "$SNAP_DATA/postgresql" 
+
+# setup the data directory
+gosu snap_daemon "$SNAP/usr/lib/postgresql/10/bin/initdb" -D "$SNAP_DATA/postgresql/10/main"
