@@ -31,6 +31,16 @@ apps:
     plugs:
       - network
       - network-bind
+  psql:
+    adapter: full
+    command: usr/bin/psql
+    environment:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    command-chain:
+      - bin/psql-wrapper.sh
+    plugs:
+      - network
 
 parts:
   # snapcraft preload is necessary to make postgres just use a different
@@ -59,3 +69,4 @@ parts:
     stage-packages:
       - postgresql
       - postgresql-contrib
+      - perl
