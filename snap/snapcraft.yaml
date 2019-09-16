@@ -15,20 +15,33 @@ passthrough:
       environment:
         LC_ALL: C.UTF-8
         LANG: C.UTF-8
-
       command-chain:
         - snap/command-chain/snapcraft-runner
 
 apps:
   postgres:
     adapter: full
-    command: bin/gosu snap_daemon $SNAP/bin/postgres-wrapper.sh
-    daemon: forking
+    command: usr/lib/postgresql/10/bin/postgres -D $SNAP_DATA/postgresql/10/main -c $CONFIG_ARG
+    daemon: simple
+    environment:
+      CONFIG_ARG: config_file=$SNAP_DATA/etc/postgresql/10/main/postgresql.conf
+    command-chain:
+      - bin/gosu-snap_daemon.sh
+      - bin/snapcraft-preload
     plugs:
       - network
       - network-bind
 
 parts:
+  # snapcraft preload is necessary to make postgres just use a different
+  # lockfile location
+  snapcraft-preload:
+    source: https://github.com/sergiusens/snapcraft-preload.git
+    plugin: cmake
+    build-packages:
+      - on amd64:
+          - gcc-multilib
+          - g++-multilib
   gosu:
     source: https://github.com/tianon/gosu.git
     plugin: go

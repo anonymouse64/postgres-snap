@@ -1,8 +1,23 @@
 #!/bin/bash -e
 
-if [ ! -d "$SNAP_DATA/etc/postgresql/10/main" ]; then
+# get the values of $SNAP_DATA and $SNAP using the current symlink instead of
+# the default behavior which has the revision hard-coded, which breaks after
+# a refresh
+SNAP_DATA_CURRENT=${SNAP_DATA/%$SNAP_REVISION/current}
+SNAP_CURRENT=${SNAP/%$SNAP_REVISION/current}
+
+if [ ! -f "$SNAP_DATA/etc/postgresql/10/main/postgresql.conf" ]; then
     mkdir -p "$SNAP_DATA/etc/postgresql/10/main"
-    touch "$SNAP_DATA/etc/postgresql/10/main/postgresql.conf"
+    cp "$SNAP/etc/postgresql/10/main/postgresql.conf" "$SNAP_DATA/etc/postgresql/10/main/postgresql.conf"
+    # do replacement of the $SNAP, $SNAP_DATA, $SNAP_COMMON environment variables in the config files
+    echo "$SNAP_COMMON"
+    cat "$SNAP_DATA/etc/postgresql/10/main/postgresql.conf"
+    sed -i -e "s@\$SNAP_COMMON@$SNAP_COMMON@g" \
+        -e "s@\$SNAP_DATA@$SNAP_DATA_CURRENT@g" \
+        -e "s@\$SNAP@$SNAP_CURRENT@g" \
+        "$SNAP_DATA/etc/postgresql/10/main/postgresql.conf"
+    cat "$SNAP_DATA/etc/postgresql/10/main/postgresql.conf"
+    echo "done"
 fi
 
 # ensure the postgres data directory exists and is owned by snap_daemon
@@ -11,3 +26,8 @@ chown -R snap_daemon:snap_daemon "$SNAP_DATA/postgresql"
 
 # setup the data directory
 gosu snap_daemon "$SNAP/usr/lib/postgresql/10/bin/initdb" -D "$SNAP_DATA/postgresql/10/main"
+
+mkdir -p "$SNAP_COMMON/sockets"
+chown -R snap_daemon:snap_daemon "$SNAP_COMMON/sockets" 
+
+snapctl stop --disable "$SNAP_NAME.postgres"
