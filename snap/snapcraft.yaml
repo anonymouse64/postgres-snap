@@ -68,7 +68,16 @@ parts:
       - etc/
   postgres:
     plugin: nil
+    override-build: |
+      snapcraftctl build
+      # the perl package for postgres hard-codes the bin dir as /usr/lib/postgresql
+      # so we need to prepend that with /snap/postgres/current/ before it will
+      # work
+      sed -i -e \
+        's@our $binroot = \"/usr/lib/postgresql/\"@our $binroot = \"/snap/postgres/current/usr/lib/postgresql/\";@' \
+        $SNAPCRAFT_PART_INSTALL/usr/share/perl5/PgCommon.pm
     stage-packages:
       - postgresql
       - postgresql-contrib
+      - postgresql-client
       - perl
