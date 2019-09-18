@@ -37,6 +37,22 @@ apps:
     environment:
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
+      PGHOST: $SNAP_COMMON/sockets
+    command-chain:
+      - bin/psql-wrapper.sh
+      # createuser should be run as the snap_daemon user, which is the user
+      # who is initially created as a role with postgres
+      - bin/gosu-snap_daemon.sh
+    plugs:
+      - network
+  psql-any:
+    adapter: full
+    command: usr/bin/psql
+    environment:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      PGHOST: $SNAP_COMMON/sockets
+      PSQLRC: $SNAP_USER_COMMON/.psqlrc
     command-chain:
       - bin/psql-wrapper.sh
     plugs:
@@ -47,6 +63,7 @@ apps:
     environment:
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
+      PGHOST: $SNAP_COMMON/sockets
     command-chain:
       - bin/psql-wrapper.sh
       # createuser should be run as the snap_daemon user, which is the user
@@ -60,6 +77,7 @@ apps:
     environment:
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
+      PGHOST: $SNAP_COMMON/sockets
     command-chain:
       - bin/psql-wrapper.sh
       # createdb should be run as the snap_daemon user, which is the user
