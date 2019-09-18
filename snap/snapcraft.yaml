@@ -52,6 +52,8 @@ parts:
       - on amd64:
           - gcc-multilib
           - g++-multilib
+    stage-packages:
+      - lib32stdc++6
   gosu:
     source: https://github.com/tianon/gosu.git
     plugin: go
