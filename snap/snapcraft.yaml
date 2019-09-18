@@ -41,6 +41,32 @@ apps:
       - bin/psql-wrapper.sh
     plugs:
       - network
+  createuser:
+    adapter: full
+    command: usr/bin/createuser
+    environment:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    command-chain:
+      - bin/psql-wrapper.sh
+      # createuser should be run as the snap_daemon user, which is the user
+      # who is initially created as a role with postgres
+      - bin/gosu-snap_daemon.sh
+    plugs:
+      - network
+  createdb:
+    adapter: full
+    command: usr/bin/createdb
+    environment:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    command-chain:
+      - bin/psql-wrapper.sh
+      # createdb should be run as the snap_daemon user, which is the user
+      # who is initially created as a role with postgres
+      - bin/gosu-snap_daemon.sh
+    plugs:
+      - network
 
 parts:
   # snapcraft preload is necessary to make postgres just use a different
